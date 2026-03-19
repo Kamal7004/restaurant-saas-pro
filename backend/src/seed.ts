@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { runMigrations, execute, queryOne } from './db';
+import { runMigrations, execute, queryOne } from './db/index';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
 async function seed() {
   console.log('🌱 Running seed...');
 
-  await runMigrations();
+  // await runMigrations();
 
   const email = process.env.SUPER_ADMIN_EMAIL || 'admin@yoursaas.com';
   const password = process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin@123';

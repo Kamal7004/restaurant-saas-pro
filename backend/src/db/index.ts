@@ -13,10 +13,10 @@ function getPool(): Pool {
       pool = new Pool({ connectionString, ssl: false });
     } else {
       pool = new Pool({
-        host:     process.env.PGHOST     || 'localhost',
-        port:     parseInt(process.env.PGPORT || '5432'),
+        host: process.env.PGHOST || 'localhost',
+        port: parseInt(process.env.PGPORT || '5432'),
         database: process.env.PGDATABASE || 'restaurant_saas',
-        user:     process.env.PGUSER     || 'postgres',
+        user: process.env.PGUSER || 'postgres',
         password: process.env.PGPASSWORD || 'password',
       });
     }
@@ -141,13 +141,13 @@ const SCHEMA = `
 `;
 
 export async function runMigrations(): Promise<void> {
-  const client = await getPool().connect();
-  try {
-    await client.query(SCHEMA);
-    console.log('✅ Database migrations complete');
-  } finally {
-    client.release();
-  }
+  // const client = await getPool().connect();
+  // try {
+  //   await client.query(SCHEMA);
+  //   console.log('✅ Database migrations complete');
+  // } finally {
+  //   client.release();
+  // }
 }
 
 function replaceP(sql: string): string {

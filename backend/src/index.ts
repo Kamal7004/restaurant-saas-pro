@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import fs from 'fs';
 import { createServer } from 'http';
 
 import { runMigrations } from './db';
@@ -26,10 +27,6 @@ const httpServer = createServer(app);
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 
 app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || true,
-  credentials: true,
-}));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -61,14 +58,24 @@ const frontendDir = process.env.FRONTEND_DIR
   ? path.resolve(process.env.FRONTEND_DIR)
   : path.join(__dirname, '../../frontend/build');
 
+// Serve static files
 app.use(express.static(frontendDir));
-app.get('*', (_req, res) => {
+
+// Fallback for SPA routing
+app.get('*', (req, res) => {
+  // Check if it's an API route that somehow got here (shouldn't happen due to order)
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+
   const indexPath = path.join(frontendDir, 'index.html');
-  const fs = require('fs');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
-    res.json({ message: 'API running. Frontend not built yet.' });
+    res.status(404).json({
+      message: 'Frontend build not found. Please build the frontend or set FRONTEND_DIR.',
+      servingFrom: frontendDir
+    });
   }
 });
 

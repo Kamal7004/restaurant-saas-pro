@@ -1,0 +1,68 @@
+name: Build and Create Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: v${{ github.run_number }}
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ⚛️ Frontend (UI)
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci --legacy-peer-deps
+          npm run build
+
+      - name: Zip Frontend
+        run: |
+          cd frontend/build
+          zip -r ../../restaurant-saas-ui.zip .
+
+      # ⚙️ Backend (API)
+      - name: Build Backend
+        working-directory: ./backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare Backend Package
+        run: |
+          mkdir server-build
+          cp -r backend/dist server-build/
+          cp backend/package.json server-build/
+          cp backend/package-lock.json server-build/ 2>/dev/null || :
+          cp backend/.env.example server-build/
+
+      - name: Zip Backend
+        run: |
+          cd server-build
+          zip -r ../restaurant-saas-be.zip .
+
+      # 🚀 Create release and upload assets
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: Release ${{ env.RELEASE_TAG }}
+          files: |
+            restaurant-saas-ui.zip
+            restaurant-saas-be.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
