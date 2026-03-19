@@ -48,7 +48,6 @@ jobs:
           cp -r backend/dist server-build/
           cp backend/package.json server-build/
           cp backend/package-lock.json server-build/ 2>/dev/null || :
-          cp backend/.env.example server-build/
 
       - name: Zip Backend
         run: |
