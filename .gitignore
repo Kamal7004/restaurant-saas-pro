@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+pgdata/
+pgsql/
+postgres.zip
+*.log
+.DS_Store
+frontend/build/
+backend/build/
+.temp/
+/tmp/
